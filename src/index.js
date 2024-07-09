@@ -4,21 +4,37 @@ import { renderGallery } from './gallery';
 
 let query = '';
 let page = 1;
+let searchTimeout;
 
 const form = document.querySelector('#search-form');
+const input = form.querySelector('input[name="searchQuery"]');
 const loadMoreBtn = document.querySelector('.load-more');
 
-form.addEventListener('submit', onSearch);
+form.addEventListener('submit', onFormSubmit);
+input.addEventListener('input', onInput);
 loadMoreBtn.addEventListener('click', onLoadMore);
 
-async function onSearch(e) {
+function onInput(e) {
+  clearTimeout(searchTimeout);
+  query = e.target.value.trim();
+  if (query) {
+    searchTimeout = setTimeout(() => {
+      onSearch(query);
+    }, 3000);
+  }
+}
+
+function onFormSubmit(e) {
   e.preventDefault();
   query = e.currentTarget.elements.searchQuery.value.trim();
   if (!query) {
     Notiflix.Notify.failure('Please enter a search query.');
     return;
   }
+  onSearch(query);
+}
 
+async function onSearch(query) {
   page = 1;
   clearGallery();
   loadMoreBtn.style.display = 'none';
